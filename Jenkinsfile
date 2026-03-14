@@ -26,7 +26,7 @@ pipeline {
                 withCredentials([string(credentialsId: 'SNYK_TOKEN', variable: 'SNYK_TOKEN')]) {
                     sh '''
                     export SNYK_TOKEN=$SNYK_TOKEN
-                    mvn snyk:test 
+                    mvn snyk:test -fn
                     '''
                 }
             }
