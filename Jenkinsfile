@@ -5,6 +5,10 @@ pipeline {
         maven 'Maven_3_8_4'
     }
 
+    environment {
+        DOCKER_IMAGE = "asg"
+    }
+
     stages {
 
         stage('Compile and Run Sonar Analysis') {
@@ -26,35 +30,31 @@ pipeline {
                 withCredentials([string(credentialsId: 'SNYK_TOKEN', variable: 'SNYK_TOKEN')]) {
                     sh '''
                     snyk auth $SNYK_TOKEN
-                    mvn snyk:test 
+                    mvn snyk:test
                     '''
                 }
             }
         }
 
-    }
-}
-
-	stage('Build') { 
-            steps { 
-               withDockerRegistry([credentialsId: "dockerlogin", url: ""]) {
-                 script{
-                 app =  docker.build("asg")
-                 }
-               }
-            }
-    }
-
-	stage('Push') {
+        stage('Build Docker Image') {
             steps {
-                script{
-                    docker.withRegistry('https://891377015455.dkr.ecr.ap-southeast-2.amazonaws.com', 'ecr:ap-southeast-2:aws-credentials') {
-                    app.push("latest")
+                script {
+                    app = docker.build("${DOCKER_IMAGE}")
+                }
+            }
+        }
+
+        stage('Push Docker Image to AWS ECR') {
+            steps {
+                script {
+                    docker.withRegistry(
+                        'https://891377015455.dkr.ecr.ap-southeast-2.amazonaws.com',
+                        'ecr:ap-southeast-2:aws-credentials'
+                    ) {
+                        app.push("latest")
                     }
                 }
             }
-    	}
-	    
-  
-
-
+        }
+    }
+}
