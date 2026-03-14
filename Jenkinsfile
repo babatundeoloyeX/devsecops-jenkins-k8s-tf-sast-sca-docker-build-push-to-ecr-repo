@@ -24,11 +24,16 @@ pipeline {
         stage('Run SCA Analysis Using Snyk') {
             steps {
                 withCredentials([string(credentialsId: 'SNYK_TOKEN', variable: 'SNYK_TOKEN')]) {
-                    sh 'mvn snyk:test'
-            
+                    sh '''
+                    export SNYK_TOKEN=$SNYK_TOKEN
+                    mvn snyk:test 
+                    '''
                 }
             }
         }
+
+    }
+}
 
 	stage('Build') { 
             steps { 
@@ -38,6 +43,7 @@ pipeline {
                  }
                }
             }
+    }
 
 	stage('Push') {
             steps {
@@ -48,8 +54,7 @@ pipeline {
                 }
             }
     	}
-
-	}
-}		
+	    
   
+
 
