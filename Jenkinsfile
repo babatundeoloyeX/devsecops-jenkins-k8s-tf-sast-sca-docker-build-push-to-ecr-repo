@@ -6,6 +6,7 @@ pipeline {
     }
 
     environment {
+        PATH = "/usr/local/bin:/usr/bin:${env.PATH}"
         DOCKER_IMAGE = "asg"
     }
 
@@ -30,7 +31,7 @@ pipeline {
                 withCredentials([string(credentialsId: 'SNYK_TOKEN', variable: 'SNYK_TOKEN')]) {
                     sh '''
                     snyk auth $SNYK_TOKEN
-                    mvn snyk:test -fn
+                    snyk:test
                     '''
                 }
             }
